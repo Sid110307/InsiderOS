@@ -1,16 +1,3 @@
 {
-	"makefile.extensionOutputFolder": "./.vscode",
-	"files.associations": {
-		"*.asm": "asm-intel-x86-generic",
-		"*.ast": "json",
-		"*.quark": "ruby",
-		"*.s": "arm",
-		"*.h": "cpp",
-		"README": "markdown",
-		"*.txt": "plaintext",
-		"*.log": "log",
-		"*.vbox": "code-text-binary",
-		"*.vbox-prev": "code-text-binary",
-		"cstdint": "cpp"
-	}
+	"makefile.extensionOutputFolder": "./.vscode"
 }

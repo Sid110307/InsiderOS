@@ -1,5 +1,7 @@
 #include "include/basicRenderer.h"
 
+BasicRenderer* GlobalRenderer;
+
 BasicRenderer::BasicRenderer(Framebuffer* targetFramebuffer, PSF1_FONT* targetFont)
 {
 	TargetFramebuffer = targetFramebuffer;
@@ -38,4 +40,26 @@ void BasicRenderer::Print(const char* str)
 		}
 		chars++;
 	}
+}
+
+void BasicRenderer::Clear(uint32_t color)
+{
+	uint64_t framebufferBaseAddress = (uint64_t)TargetFramebuffer->BaseAddress;
+	uint64_t bytesPerScanline = TargetFramebuffer->PixelsPerScanline * 4;
+	uint64_t framebufferHeight = TargetFramebuffer->Height;
+	uint64_t framebufferSize = TargetFramebuffer->BufferSize;
+
+	for (int verticalScanline = 0; verticalScanline < framebufferHeight; verticalScanline++)
+	{
+		uint64_t pixelPointerBase = framebufferBaseAddress + (verticalScanline * bytesPerScanline);
+
+		for (uint32_t* pixelPointer = (uint32_t*)pixelPointerBase; pixelPointer < (uint32_t*)(pixelPointerBase + bytesPerScanline); pixelPointer++)
+			*pixelPointer = color;
+	}
+}
+
+void BasicRenderer::NextLine()
+{
+	cursorPosition.x = 0;
+	cursorPosition.y += 16;
 }

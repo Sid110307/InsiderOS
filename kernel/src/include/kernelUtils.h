@@ -5,13 +5,19 @@
 
 #include "basicRenderer.h"
 #include "cstr.h"
+#include "bitmap.h"
+
 #include "efiMemory.h"
 #include "memory.h"
-#include "bitmap.h"
+
 #include "pageFrameAllocator.h"
 #include "pageMapIndexer.h"
 #include "pageTableManager.h"
 #include "paging.h"
+
+#include "gdt.h"
+#include "IDT.h"
+#include "interrupts.h"
 
 struct BootInfo {
 	Framebuffer* framebuffer;

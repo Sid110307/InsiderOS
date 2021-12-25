@@ -2,6 +2,8 @@
 
 KernelInfo kernelInfo;
 PageTableManager pageTableManager = NULL;
+IDTR idtr;
+BasicRenderer renderer(NULL, NULL);
 
 void PrepareMemory(BootInfo* bootInfo)
 {
@@ -36,10 +38,38 @@ void PrepareMemory(BootInfo* bootInfo)
 	kernelInfo.pageTableManager = &pageTableManager;
 }
 
+void PrepareInterrupts()
+{
+	idtr.Limit = 0x0FFF;
+	idtr.Offset = (uint64_t)globalAllocator.RequestPage();
+
+	IDTDescEntry* pageFaultInterrupt = (IDTDescEntry*)(idtr.Offset + 0xE * sizeof(IDTDescEntry));
+	pageFaultInterrupt->SetOffset((uint64_t)&PageFaultHandler);
+	pageFaultInterrupt->typeAttr = IDT_TA_INTERRUPT_GATE;
+	pageFaultInterrupt->selector = 0x08;
+
+	IDTDescEntry* doubleFaultInterrupt = (IDTDescEntry*)(idtr.Offset + 0x8 * sizeof(IDTDescEntry));
+	doubleFaultInterrupt->SetOffset((uint64_t)&DoubleFaultHandler);
+	doubleFaultInterrupt->typeAttr = IDT_TA_INTERRUPT_GATE;
+	doubleFaultInterrupt->selector = 0x08;
+
+	IDTDescEntry* generalProtectionFaultInterrupt = (IDTDescEntry*)(idtr.Offset + 0xD * sizeof(IDTDescEntry));
+	generalProtectionFaultInterrupt->SetOffset((uint64_t)&GeneralProtectionFaultHandler);
+	generalProtectionFaultInterrupt->typeAttr = IDT_TA_INTERRUPT_GATE;
+	generalProtectionFaultInterrupt->selector = 0x08;
+
+	asm("lidt %0" :: "m"(idtr));
+}
+
 KernelInfo InitializeKernel(BootInfo* bootInfo)
 {
+	renderer = BasicRenderer(bootInfo->framebuffer, bootInfo->font);
+	GlobalRenderer = &renderer;
+
 	PrepareMemory(bootInfo);
 	memset(bootInfo->framebuffer->BaseAddress, 0, bootInfo->framebuffer->BufferSize);
+
+	PrepareInterrupts();
 
 	return kernelInfo;
 }
