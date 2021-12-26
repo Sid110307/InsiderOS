@@ -28,7 +28,7 @@ InitializeLibPlatform (
 #ifdef __GNUC__
 void __div0(void)
 {
-    // TODO handle divide by zero fault
+    // handle divide by zero fault
     while (1);
 }
 #endif

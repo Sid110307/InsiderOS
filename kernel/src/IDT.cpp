@@ -1,4 +1,4 @@
-#include "include/IDT.h"
+#include "include/interrupts/IDT.h"
 
 void IDTDescEntry::SetOffset(uint64_t offset)
 {

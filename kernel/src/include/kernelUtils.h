@@ -1,8 +1,8 @@
 #pragma once
 
 #include <stddef.h>
-#include "../lib/framebuffer.h"
 
+#include "../lib/framebuffer.h"
 #include "basicRenderer.h"
 #include "cstr.h"
 #include "bitmap.h"
@@ -16,8 +16,10 @@
 #include "paging.h"
 
 #include "gdt.h"
-#include "IDT.h"
-#include "interrupts.h"
+#include "interrupts/IDT.h"
+#include "interrupts/interrupts.h"
+
+#include "hardware/IO.h"
 
 struct BootInfo {
 	Framebuffer* framebuffer;

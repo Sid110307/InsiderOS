@@ -58,7 +58,19 @@ void PrepareInterrupts()
 	generalProtectionFaultInterrupt->typeAttr = IDT_TA_INTERRUPT_GATE;
 	generalProtectionFaultInterrupt->selector = 0x08;
 
+	IDTDescEntry* keyboardInterrupt = (IDTDescEntry*)(idtr.Offset + 0x21 * sizeof(IDTDescEntry));
+	keyboardInterrupt->SetOffset((uint64_t)&KeyboardHandler);
+	keyboardInterrupt->typeAttr = IDT_TA_INTERRUPT_GATE;
+	keyboardInterrupt->selector = 0x08;
+
 	asm("lidt %0" :: "m"(idtr));
+
+	RemapPIC();
+
+	outByte(PIC1_DATA, 0b11111101);
+	outByte(PIC2_DATA, 0b11111111);
+
+	asm("sti");
 }
 
 KernelInfo InitializeKernel(BootInfo* bootInfo)
