@@ -7,7 +7,7 @@ CC = gcc
 ASMC = nasm
 LD = ld
 
-CFLAGS = -ffreestanding -fshort-wchar
+CFLAGS = -ffreestanding -fshort-wchar -mno-red-zone
 ASMFLAGS =
 LDFLAGS = -T $(LDS) -static -Bsymbolic -nostdlib
 
@@ -27,25 +27,25 @@ DIRS = $(wildcard $(SRCDIR)/*)
 kernel: $(OBJS) link
 
 $(OBJDIR)/interrupts.o: **/interrupts.cpp
-	@echo -n Compiling $^...
+	@echo -n "Compiling $^... "
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -mno-red-zone -mgeneral-regs-only -c $^ -o $@
+	$(CC) $(CFLAGS) -mgeneral-regs-only -c $^ -o $@
 	@echo Done.
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
-	@echo -n Compiling $^...
+	@echo -n "Compiling $^... "
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $^ -o $@
 	@echo Done.
 
 $(OBJDIR)/%_asm.o: $(SRCDIR)/%.asm
-	@echo -n Assembling $^...
+	@echo -n "Assembling $^... "
 	@mkdir -p $(@D)
 	$(ASMC) $(ASMFLAGS) $^ -f elf64 -o $@
 	@echo Done.
 
 link:
-	@echo -n Linking...
+	@echo -n "Linking... "
 	$(LD) $(LDFLAGS) -o $(BUILDDIR)/kernel.elf $(OBJS)
 	@echo Done.
 
@@ -66,3 +66,8 @@ buildimg:
 
 run:
 	qemu-system-x86_64 -drive format=raw,file=$(BUILDDIR)/$(OSNAME).img -m 256M -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF_CODE-pure-efi.fd",readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS-pure-efi.fd" -net none
+
+clean:
+	echo -n "Cleaning... "
+	rm -rf src/**/*.o
+	echo Done.

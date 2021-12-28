@@ -17,10 +17,22 @@ void BasicRenderer::DrawChar(char chr, unsigned int xOffset, unsigned int yOffse
 
 	for (unsigned long y = yOffset; y < yOffset + 16; y++)
 	{
-		for (unsigned long x = xOffset; x < xOffset + 16; x++)
+		for (unsigned long x = xOffset; x < xOffset + 8; x++)
 			if ((*fontPointer & (0b10000000 >> (x - xOffset))) > 0)
 				*(unsigned int*)(pixelPointer + x + (y * TargetFramebuffer->PixelsPerScanline)) = Color;
 		fontPointer++;
+	}
+}
+
+void BasicRenderer::DrawChar(char chr)
+{
+	DrawChar(chr, cursorPosition.x, cursorPosition.y);
+	cursorPosition.x += 8;
+
+	if (cursorPosition.x + 8 > TargetFramebuffer->Width)
+	{
+		cursorPosition.x = 0;
+		cursorPosition.y += 16;
 	}
 }
 
@@ -42,7 +54,38 @@ void BasicRenderer::Print(const char* str)
 	}
 }
 
-void BasicRenderer::Clear(uint32_t color)
+void BasicRenderer::ClearChar()
+{
+	if (cursorPosition.x == 0)
+	{
+		cursorPosition.x = TargetFramebuffer->Width;
+		cursorPosition.y -= 16;
+
+		if (cursorPosition.y < 0) cursorPosition.y = 0;
+	}
+
+	unsigned int xOffset = cursorPosition.x;
+	unsigned int yOffset = cursorPosition.y;
+
+	unsigned int* pixelPointer = (unsigned int*)TargetFramebuffer->BaseAddress;
+	for (unsigned long y = yOffset; y < yOffset + 16; y++)
+	{
+		for (unsigned long x = xOffset - 8; x < xOffset; x++)
+			*(unsigned int*)(pixelPointer + x + (y * TargetFramebuffer->PixelsPerScanline)) = ClearColor;
+	}
+
+	cursorPosition.x -= 8;
+
+	if (cursorPosition.x < 0)
+	{
+		cursorPosition.x = TargetFramebuffer->Width;
+		cursorPosition.y -= 16;
+
+		if (cursorPosition.y < 0) cursorPosition.y = 0;
+	}
+}
+
+void BasicRenderer::Clear()
 {
 	uint64_t framebufferBaseAddress = (uint64_t)TargetFramebuffer->BaseAddress;
 	uint64_t bytesPerScanline = TargetFramebuffer->PixelsPerScanline * 4;
@@ -54,7 +97,7 @@ void BasicRenderer::Clear(uint32_t color)
 		uint64_t pixelPointerBase = framebufferBaseAddress + (verticalScanline * bytesPerScanline);
 
 		for (uint32_t* pixelPointer = (uint32_t*)pixelPointerBase; pixelPointer < (uint32_t*)(pixelPointerBase + bytesPerScanline); pixelPointer++)
-			*pixelPointer = color;
+			*pixelPointer = ClearColor;
 	}
 }
 

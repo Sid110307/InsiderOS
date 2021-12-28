@@ -2,7 +2,8 @@
 
 void Panic(const char* message)
 {
-	GlobalRenderer->Clear(COLOR_DARK_CYAN);
+	GlobalRenderer->ClearColor = COLOR_DARK_CYAN;
+	GlobalRenderer->Clear();
 	GlobalRenderer->cursorPosition = { 0, 0 };
 	GlobalRenderer->Color = COLOR_DARK_RED;
 	GlobalRenderer->NextLine();

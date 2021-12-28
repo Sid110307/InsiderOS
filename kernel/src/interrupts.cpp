@@ -1,30 +1,36 @@
 #include "include/interrupts/interrupts.h"
 
-void PageFaultHandler(struct interruptFrame* frame)
+void PageFaultHandler(interruptFrame* frame)
 {
 	Panic("Page Fault Detected!");
 	while (true);
 }
 
-void DoubleFaultHandler(struct interruptFrame* frame)
+void DoubleFaultHandler(interruptFrame* frame)
 {
 	Panic("Double Faults Detected!");
 	while (true);
 }
 
-void GeneralProtectionFaultHandler(struct interruptFrame* frame)
+void GeneralProtectionFaultHandler(interruptFrame* frame)
 {
 	Panic("General Protection Fault (Segfault) Detected!");
 	while (true);
 }
 
-void KeyboardInterruptHandler(struct interruptFrame* frame)
+void KeyboardInterruptHandler(interruptFrame* frame)
 {
-	GlobalRenderer->Print("Pressed!");
+	uint8_t scancode = inByte(0x60);
+	handleKeyboardEvent(scancode);
+	PICEndMaster();
+}
+
+void MouseInterruptHandler(interruptFrame* frame)
+{
+	GlobalRenderer->Print("Mouse!");
 	GlobalRenderer->NextLine();
 
-	uint8_t scancode = inByte(0x60);
-	PICEndMaster();
+	PICEndSlave();
 }
 
 void RemapPIC()

@@ -38,30 +38,24 @@ void PrepareMemory(BootInfo* bootInfo)
 	kernelInfo.pageTableManager = &pageTableManager;
 }
 
+void SetIDTGate(void* handler, uint8_t entryOffset, uint8_t typeAttribute, uint8_t selector)
+{
+	IDTDescEntry* interrupt = (IDTDescEntry*)(idtr.Offset + entryOffset * sizeof(IDTDescEntry));
+	interrupt->SetOffset((uint64_t)handler);
+	interrupt->typeAttr = typeAttribute;
+	interrupt->selector = selector;
+}
+
 void PrepareInterrupts()
 {
 	idtr.Limit = 0x0FFF;
 	idtr.Offset = (uint64_t)globalAllocator.RequestPage();
 
-	IDTDescEntry* pageFaultInterrupt = (IDTDescEntry*)(idtr.Offset + 0xE * sizeof(IDTDescEntry));
-	pageFaultInterrupt->SetOffset((uint64_t)&PageFaultHandler);
-	pageFaultInterrupt->typeAttr = IDT_TA_INTERRUPT_GATE;
-	pageFaultInterrupt->selector = 0x08;
-
-	IDTDescEntry* doubleFaultInterrupt = (IDTDescEntry*)(idtr.Offset + 0x8 * sizeof(IDTDescEntry));
-	doubleFaultInterrupt->SetOffset((uint64_t)&DoubleFaultHandler);
-	doubleFaultInterrupt->typeAttr = IDT_TA_INTERRUPT_GATE;
-	doubleFaultInterrupt->selector = 0x08;
-
-	IDTDescEntry* generalProtectionFaultInterrupt = (IDTDescEntry*)(idtr.Offset + 0xD * sizeof(IDTDescEntry));
-	generalProtectionFaultInterrupt->SetOffset((uint64_t)&GeneralProtectionFaultHandler);
-	generalProtectionFaultInterrupt->typeAttr = IDT_TA_INTERRUPT_GATE;
-	generalProtectionFaultInterrupt->selector = 0x08;
-
-	IDTDescEntry* keyboardInterrupt = (IDTDescEntry*)(idtr.Offset + 0x21 * sizeof(IDTDescEntry));
-	keyboardInterrupt->SetOffset((uint64_t)&KeyboardHandler);
-	keyboardInterrupt->typeAttr = IDT_TA_INTERRUPT_GATE;
-	keyboardInterrupt->selector = 0x08;
+	SetIDTGate((void*)PageFaultHandler, 0xE, IDT_TA_INTERRUPT_GATE, 0x08);
+	SetIDTGate((void*)DoubleFaultHandler, 0x8, IDT_TA_INTERRUPT_GATE, 0x08);
+	SetIDTGate((void*)GeneralProtectionFaultHandler, 0xD, IDT_TA_INTERRUPT_GATE, 0x08);
+	SetIDTGate((void*)KeyboardInterruptHandler, 0x21, IDT_TA_INTERRUPT_GATE, 0x08);
+	SetIDTGate((void*)MouseInterruptHandler, 0x2C, IDT_TA_INTERRUPT_GATE, 0x08);
 
 	asm("lidt %0" :: "m"(idtr));
 
