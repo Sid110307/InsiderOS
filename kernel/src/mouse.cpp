@@ -25,7 +25,7 @@ void InitPS2Mouse()
 	MouseWaitInput();
 
 	uint8_t status = inByte(0x60);
-	status |= 0b10;c
+	status |= 0b10;
 	MouseWait();
 
 	outByte(0x64, 0x60);
