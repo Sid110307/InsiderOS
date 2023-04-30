@@ -1,7 +1,5 @@
 #include "include/kernelUtils.h"
 
-// uint8_t testBuffer[20];
-
 extern "C" void _start(BootInfo * bootInfo)
 {
 	GDTDescriptor gdtDescriptor;
@@ -13,6 +11,10 @@ extern "C" void _start(BootInfo * bootInfo)
 	KernelInfo kernelInfo = InitializeKernel(bootInfo);
 	PageTableManager* pageTableManager = kernelInfo.pageTableManager;
 
+	GlobalRenderer->ClearColor = COLOR_CYAN;
+	GlobalRenderer->Clear();
+
+	GlobalRenderer->Color = COLOR_RED;
 	GlobalRenderer->Print("Kernel Initialized Successfully!");
 
 	while (true);
